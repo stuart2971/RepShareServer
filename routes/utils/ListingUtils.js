@@ -2,6 +2,7 @@ var ObjectId = require("mongoose").Types.ObjectId;
 
 const ListingModel = require("../../models/Listing");
 const UserModel = require("../../models/User");
+const { isIdValid } = require("./GeneralUtils");
 
 const { scrape } = require("./webscrape");
 
@@ -35,6 +36,7 @@ async function addListing(listing) {
     }
 }
 
+// Checks if a listing exists by its link
 async function doesExist(link) {
     try {
         const listing = await ListingModel.findOne({ link }, "_id");
@@ -47,16 +49,30 @@ async function doesExist(link) {
     }
 }
 
+// Gets the entire listing document by id
 async function getListing(listingId) {
     try {
-        if (!ObjectId.isValid(listingId)) {
-            return null;
-        }
+        if (!isIdValid(listingId)) return null;
+
         const listing = await ListingModel.findOne({ _id: listingId });
         return listing;
     } catch (err) {
-        console.log("ERROR GET LISTING METHOD ", err);
+        console.log("ERROR IN GET LISTING METHOD ", err);
     }
 }
 
-module.exports = { addListing, doesExist, getListing };
+// Gets the listing data from an array of ids
+async function getListingData(listingsArray) {
+    try {
+        const myListings = await ListingModel.find({
+            _id: {
+                $in: listingsArray,
+            },
+        });
+        return myListings;
+    } catch (err) {
+        console.log("ERROR IN GET LISTING DATA METHOD ", err);
+    }
+}
+
+module.exports = { addListing, doesExist, getListing, getListingData };

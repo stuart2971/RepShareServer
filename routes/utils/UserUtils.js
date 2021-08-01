@@ -1,6 +1,8 @@
 const UserModel = require("../../models/User");
 const ListingModel = require("../../models/Listing");
 
+const { isIdValid } = require("./GeneralUtils");
+
 // If the user does not exist, returns the newly inserted user.  If it
 // does exist, returns the user doc
 async function getUser(auth0Id, name) {
@@ -51,19 +53,15 @@ async function getDashboardData(auth0Id) {
     }
 }
 
-// Fetches listings that user contributed to public
+// Fetches listings (ids) that user has contributed to public
 async function getMyListings(auth0Id) {
     try {
         const listingIds = await UserModel.findOne(
             { auth0Id },
             "listingsContributed"
         );
-        const myListings = await ListingModel.find({
-            _id: {
-                $in: listingIds.listingsContributed,
-            },
-        });
-        return myListings;
+
+        return listingIds;
     } catch (err) {
         console.log("ERROR GETTING MY LISTINGS", err);
     }

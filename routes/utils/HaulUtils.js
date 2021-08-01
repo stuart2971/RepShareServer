@@ -1,5 +1,6 @@
-var ObjectId = require("mongoose").Types.ObjectId;
 const UserModel = require("../../models/User");
+
+const { isIdValid } = require("./GeneralUtils");
 
 // Creates a haul and returns all the hauls in the updated document
 async function createHaul(auth0Id, haulName) {
@@ -33,9 +34,7 @@ async function createHaul(auth0Id, haulName) {
 // If haul is not found, returns null
 async function removeHaul(auth0Id, haulId) {
     try {
-        if (!ObjectId.isValid(haulId)) {
-            return null;
-        }
+        if (!ObjectId.isValid(haulId)) return null;
         const newUser = await UserModel.findOneAndUpdate(
             { auth0Id },
             { $pull: { hauls: { _id: haulId } } },
@@ -60,9 +59,8 @@ async function removeHaul(auth0Id, haulId) {
 // Gets a single haul from the array of hauls
 async function getHaul(auth0Id, haulId) {
     try {
-        if (!ObjectId.isValid(haulId)) {
-            return null;
-        }
+        if (!isIdValid(haulId)) return null;
+
         const haul = await UserModel.findOne(
             {
                 auth0Id,
@@ -78,4 +76,23 @@ async function getHaul(auth0Id, haulId) {
     }
 }
 
-module.exports = { createHaul, removeHaul, getHaul };
+// Unfinished
+async function getHaulsData(auth0Id) {
+    try {
+        const haulsData = await UserModel.aggregate([
+            { $match: { auth0Id } },
+            {
+                $project: {
+                    listingSize: {
+                        $size: "$hauls.listings",
+                    },
+                },
+            },
+        ]);
+        return haulsData;
+    } catch (err) {
+        console.log("ERROR trying to create haul.  ", err);
+    }
+}
+
+module.exports = { createHaul, removeHaul, getHaul, getHaulsData };
