@@ -9,14 +9,19 @@ const { scrape } = require("./webscrape");
 // Adds a listing (scraped) into db and returns the new doc with the _id
 async function addListing(listing) {
     try {
-        const scrapedData = await scrape(listing.link);
+        const scrapedResults = await scrape(listing.link);
+        const scrapedData = {
+            name: scrapedResults ? scrapedResults.name : "",
+            imageURL: scrapedResults ? scrapedResults.imageURL : "",
+            price: scrapedResults ? scrapedResults.price : "",
+        };
 
         const newListing = new ListingModel({
             name: listing.name || scrapedData.name,
             link: listing.link,
             imageURL: [listing.imageURL] || scrapedData.imageURL,
-            tag: listing.tag,
-            price: scrapedData ? scrapedData.price : "",
+            tag: listing.tag || "",
+            price: scrapedData.price,
             qualityChecks: [],
             inHaul: 0,
         });
@@ -75,4 +80,29 @@ async function getListingData(listingsArray) {
     }
 }
 
-module.exports = { addListing, doesExist, getListing, getListingData };
+async function getNewListings(limit, skip) {
+    try {
+        const newListings = await ListingModel.find({})
+            .select("_id")
+            .limit(limit)
+            .skip(skip)
+            .sort({
+                _id: -1,
+            });
+        let idList = [];
+        for (let i = 0; i < newListings.length; i++) {
+            idList.push(newListings[i]._id);
+        }
+        return idList;
+    } catch (err) {
+        console.log("ERROR IN GET LISTING DATA METHOD ", err);
+    }
+}
+
+module.exports = {
+    addListing,
+    doesExist,
+    getListing,
+    getListingData,
+    getNewListings,
+};

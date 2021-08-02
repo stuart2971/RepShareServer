@@ -5,7 +5,7 @@ var ObjectId = require("mongoose").Types.ObjectId;
 function isIdValid(id) {
     if (ObjectId.isValid(id)) return true;
     else {
-        console.log(id + " is not a valid ObjectId");
+        console.log(`'${id}' is not a valid ObjectId`);
         return false;
     }
 }

@@ -76,16 +76,18 @@ async function getHaul(auth0Id, haulId) {
     }
 }
 
-// Unfinished
+// Gets the haul name, id, and number of listings of all the hauls in a user
 async function getHaulsData(auth0Id) {
     try {
         const haulsData = await UserModel.aggregate([
             { $match: { auth0Id } },
+            { $unwind: "$hauls" },
             {
                 $project: {
                     listingSize: {
                         $size: "$hauls.listings",
                     },
+                    name: "$hauls.name",
                 },
             },
         ]);
@@ -94,5 +96,61 @@ async function getHaulsData(auth0Id) {
         console.log("ERROR trying to create haul.  ", err);
     }
 }
+// Adds a listing to the users haul.  If successfully inserts, returns user id, otherwise null
+async function addListingToHaul(auth0Id, haulId, listingId) {
+    try {
+        if (!isIdValid(haulId) || !isIdValid(listingId)) return null;
 
-module.exports = { createHaul, removeHaul, getHaul, getHaulsData };
+        const inserted = await UserModel.findOneAndUpdate(
+            { auth0Id, "hauls._id": haulId },
+            { $push: { "hauls.$.listings": listingId } },
+            {
+                projection: {
+                    hauls: 0,
+                    listingsContributed: 0,
+                    name: 0,
+                    auth0Id: 0,
+                    currency: 0,
+                    numberOfQualityChecks: 0,
+                },
+            }
+        );
+        return inserted;
+    } catch (err) {
+        console.log("ERROR trying to create haul.  ", err);
+    }
+}
+
+// Removes a listing to the users haul.  If successfully removes, returns user id, otherwise null
+async function removeListingFromHaul(auth0Id, haulId, listingId) {
+    try {
+        if (!isIdValid(haulId) || !isIdValid(listingId)) return null;
+
+        const inserted = await UserModel.findOneAndUpdate(
+            { auth0Id, "hauls._id": haulId },
+            { $pull: { "hauls.$.listings": listingId } },
+            {
+                projection: {
+                    hauls: 0,
+                    listingsContributed: 0,
+                    name: 0,
+                    auth0Id: 0,
+                    currency: 0,
+                    numberOfQualityChecks: 0,
+                },
+            }
+        );
+        return inserted;
+    } catch (err) {
+        console.log("ERROR trying to create haul.  ", err);
+    }
+}
+
+module.exports = {
+    createHaul,
+    removeHaul,
+    getHaul,
+    getHaulsData,
+    addListingToHaul,
+    removeListingFromHaul,
+};

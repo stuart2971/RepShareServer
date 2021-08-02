@@ -7,6 +7,7 @@ const {
     doesExist,
     getListing,
     getListingData,
+    getNewListings,
 } = require("./utils/ListingUtils");
 
 router.post("/addListing", async (req, res) => {
@@ -19,7 +20,7 @@ router.post("/doesExist", async (req, res) => {
     res.json(exists);
 });
 
-router.get("/:listingId", async (req, res) => {
+router.get("/getListing/:listingId", async (req, res) => {
     const listing = await getListing(req.params.listingId);
     res.json(listing);
 });
@@ -27,5 +28,13 @@ router.get("/:listingId", async (req, res) => {
 router.post("/getListingData", async (req, res) => {
     const listingData = await getListingData(req.body.listings);
     res.json(listingData);
+});
+
+router.get("/newListings/:limit/:skip", async (req, res) => {
+    const newListings = await getNewListings(
+        parseInt(req.params.limit),
+        parseInt(req.params.skip)
+    );
+    res.json(newListings);
 });
 module.exports = router;
