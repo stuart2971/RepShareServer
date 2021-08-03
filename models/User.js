@@ -10,6 +10,7 @@ const User = new Schema({
         {
             name: String,
             listings: [Schema.Types.ObjectId],
+            lastUpdated: Date,
         },
     ],
     listingsContributed: [Schema.Types.ObjectId],

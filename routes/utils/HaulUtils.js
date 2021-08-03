@@ -8,6 +8,7 @@ async function createHaul(auth0Id, haulName) {
         const haul = {
             name: haulName,
             listings: [],
+            lastUpdated: new Date(),
         };
         const newUser = await UserModel.findOneAndUpdate(
             { auth0Id },
@@ -88,6 +89,7 @@ async function getHaulsData(auth0Id) {
                         $size: "$hauls.listings",
                     },
                     name: "$hauls.name",
+                    lastUpdated: "$hauls.lastUpdated",
                 },
             },
         ]);
@@ -103,7 +105,10 @@ async function addListingToHaul(auth0Id, haulId, listingId) {
 
         const inserted = await UserModel.findOneAndUpdate(
             { auth0Id, "hauls._id": haulId },
-            { $push: { "hauls.$.listings": listingId } },
+            {
+                $push: { "hauls.$.listings": listingId },
+                "hauls.$.lastUpdated": new Date(),
+            },
             {
                 projection: {
                     hauls: 0,
@@ -128,7 +133,10 @@ async function removeListingFromHaul(auth0Id, haulId, listingId) {
 
         const inserted = await UserModel.findOneAndUpdate(
             { auth0Id, "hauls._id": haulId },
-            { $pull: { "hauls.$.listings": listingId } },
+            {
+                $pull: { "hauls.$.listings": listingId },
+                "hauls.$.lastUpdated": new Date(),
+            },
             {
                 projection: {
                     hauls: 0,
