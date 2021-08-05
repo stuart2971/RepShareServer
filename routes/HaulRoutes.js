@@ -13,13 +13,13 @@ const {
 } = require("./utils/HaulUtils");
 
 router.get("/:auth0Id/createHaul/:haulName", async (req, res) => {
-    const newUser = await createHaul(req.params.auth0Id, req.params.haulName);
-    res.json(newUser);
+    const newHauls = await createHaul(req.params.auth0Id, req.params.haulName);
+    res.json(newHauls);
 });
 
 router.get("/:auth0Id/removeHaul/:haulId", async (req, res) => {
-    const newUser = await removeHaul(req.params.auth0Id, req.params.haulId);
-    res.json(newUser);
+    const newHauls = await removeHaul(req.params.auth0Id, req.params.haulId);
+    res.json(newHauls);
 });
 
 router.get("/:auth0Id/getHaul/:haulId", async (req, res) => {

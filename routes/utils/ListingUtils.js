@@ -4,7 +4,7 @@ const ListingModel = require("../../models/Listing");
 const UserModel = require("../../models/User");
 const { isIdValid } = require("./GeneralUtils");
 
-const { scrape } = require("./webscrape");
+const { scrape, scrapeImgur } = require("./webscrape");
 
 // Adds a listing (scraped) into db and returns the new doc with the _id
 async function addListing(listing) {
@@ -15,15 +15,19 @@ async function addListing(listing) {
             imageURL: scrapedResults ? scrapedResults.imageURL : "",
             price: scrapedResults ? scrapedResults.price : "",
         };
+        const images = await scrapeImgur(listing.imageURL);
+        console.log(images);
 
         const newListing = new ListingModel({
             name: listing.name || scrapedData.name,
             link: listing.link,
-            imageURL: [listing.imageURL] || scrapedData.imageURL,
-            tag: listing.tag || "",
+            imageURL: images ? images.imageURL : [],
+            tag: listing.tag,
             price: scrapedData.price,
             qualityChecks: [],
             inHaul: 0,
+            createdBy: listing.auth0Id,
+            message: listing.message,
         });
 
         return new Promise((resolve) => {

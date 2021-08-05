@@ -35,7 +35,7 @@ async function createHaul(auth0Id, haulName) {
 // If haul is not found, returns null
 async function removeHaul(auth0Id, haulId) {
     try {
-        if (!ObjectId.isValid(haulId)) return null;
+        if (!isIdValid(haulId)) return null;
         const newUser = await UserModel.findOneAndUpdate(
             { auth0Id },
             { $pull: { hauls: { _id: haulId } } },
@@ -53,7 +53,7 @@ async function removeHaul(auth0Id, haulId) {
         );
         return newUser;
     } catch (err) {
-        console.log("ERROR trying to create haul.  ", err);
+        console.log("ERROR trying to remove haul.  ", err);
     }
 }
 
@@ -85,6 +85,7 @@ async function getHaulsData(auth0Id) {
             { $unwind: "$hauls" },
             {
                 $project: {
+                    _id: "$hauls._id",
                     listingSize: {
                         $size: "$hauls.listings",
                     },
