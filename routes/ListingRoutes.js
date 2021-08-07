@@ -6,7 +6,7 @@ const {
     addListing,
     doesExist,
     getListing,
-    getListingData,
+    getListingsData,
     getNewListings,
 } = require("./utils/ListingUtils");
 
@@ -25,8 +25,8 @@ router.get("/getListing/:listingId", async (req, res) => {
     res.json(listing);
 });
 
-router.post("/getListingData", async (req, res) => {
-    const listingData = await getListingData(req.body.listings);
+router.post("/getListingsData", async (req, res) => {
+    const listingData = await getListingsData(req.body.listings);
     res.json(listingData);
 });
 

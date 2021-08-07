@@ -1,4 +1,5 @@
 var ObjectId = require("mongoose").Types.ObjectId;
+var mongoose = require("mongoose");
 
 const ListingModel = require("../../models/Listing");
 const UserModel = require("../../models/User");
@@ -15,13 +16,15 @@ async function addListing(listing) {
             imageURL: scrapedResults ? scrapedResults.imageURL : "",
             price: scrapedResults ? scrapedResults.price : "",
         };
-        const images = await scrapeImgur(listing.imageURL);
-        console.log(images);
+        let images = [];
+        if (listing.imageURL) {
+            images = await scrapeImgur(listing.imageURL);
+        }
 
         const newListing = new ListingModel({
             name: listing.name || scrapedData.name,
             link: listing.link,
-            imageURL: images ? images.imageURL : [],
+            imageURL: images,
             tag: listing.tag,
             price: scrapedData.price,
             qualityChecks: [],
@@ -71,19 +74,33 @@ async function getListing(listingId) {
 }
 
 // Gets the listing data from an array of ids
-async function getListingData(listingsArray) {
+async function getListingsData(listingsArray) {
     try {
-        const myListings = await ListingModel.find({
-            _id: {
-                $in: listingsArray,
-            },
+        // Since aggregate does not cast the string ids into ObjectIds (like in find()) we have to do it manually ourselves
+        listingsArray = listingsArray.map(function (el) {
+            return mongoose.Types.ObjectId(el);
         });
+        const myListings = await ListingModel.aggregate([
+            { $match: { _id: { $in: listingsArray } } },
+            {
+                $project: {
+                    dateCreated: { $toDate: "$_id" },
+                    name: 1,
+                    link: 1,
+                    price: 1,
+                    tag: 1,
+                    imageURL: 1,
+                    qualityChecks: { $size: "$qualityChecks" },
+                },
+            },
+        ]);
         return myListings;
     } catch (err) {
         console.log("ERROR IN GET LISTING DATA METHOD ", err);
     }
 }
 
+// Gets the ids of the most recent listings
 async function getNewListings(limit, skip) {
     try {
         const newListings = await ListingModel.find({})
@@ -107,6 +124,6 @@ module.exports = {
     addListing,
     doesExist,
     getListing,
-    getListingData,
+    getListingsData,
     getNewListings,
 };

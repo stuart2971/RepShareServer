@@ -2,7 +2,7 @@ const UserModel = require("../../models/User");
 
 const { isIdValid } = require("./GeneralUtils");
 
-// Creates a haul and returns all the hauls in the updated document
+// Creates a haul and returns { inserted: true/false }
 async function createHaul(auth0Id, haulName) {
     try {
         const haul = {
@@ -10,48 +10,32 @@ async function createHaul(auth0Id, haulName) {
             listings: [],
             lastUpdated: new Date(),
         };
-        const newUser = await UserModel.findOneAndUpdate(
+        const updatedStatus = await UserModel.updateOne(
             { auth0Id },
-            { $push: { hauls: haul } },
-            {
-                new: true,
-                projection: {
-                    "hauls.listings": 0,
-                    listingsContributed: 0,
-                    name: 0,
-                    auth0Id: 0,
-                    currency: 0,
-                    numberOfQualityChecks: 0,
-                },
-            }
+            { $push: { hauls: haul } }
         );
-        return newUser;
+        if (updatedStatus.ok === 1) {
+            return { inserted: true };
+        }
+        return { inserted: false };
     } catch (err) {
         console.log("ERROR trying to create haul.  ", err);
     }
 }
 
-// Removes a haul and returns all the remaining hauls in the updated document.
+// Removes a haul and returns { deleted: true/false }
 // If haul is not found, returns null
 async function removeHaul(auth0Id, haulId) {
     try {
         if (!isIdValid(haulId)) return null;
-        const newUser = await UserModel.findOneAndUpdate(
+        const updatedStatus = await UserModel.updateOne(
             { auth0Id },
-            { $pull: { hauls: { _id: haulId } } },
-            {
-                new: true,
-                projection: {
-                    "hauls.listings": 0,
-                    listingsContributed: 0,
-                    name: 0,
-                    auth0Id: 0,
-                    currency: 0,
-                    numberOfQualityChecks: 0,
-                },
-            }
+            { $pull: { hauls: { _id: haulId } } }
         );
-        return newUser;
+        if (updatedStatus.ok === 1) {
+            return { deleted: true };
+        }
+        return { deleted: false };
     } catch (err) {
         console.log("ERROR trying to remove haul.  ", err);
     }
