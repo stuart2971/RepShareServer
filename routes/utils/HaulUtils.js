@@ -57,7 +57,7 @@ async function getHaul(auth0Id, haulId) {
         );
         return haul;
     } catch (err) {
-        console.log("ERROR trying to create haul.  ", err);
+        console.log("ERROR trying to get haul.  ", err);
     }
 }
 
@@ -80,7 +80,7 @@ async function getHaulsData(auth0Id) {
         ]);
         return haulsData;
     } catch (err) {
-        console.log("ERROR trying to create haul.  ", err);
+        console.log("ERROR trying to get hauls data.  ", err);
     }
 }
 // Adds a listing to the users haul.  If successfully inserts, returns user id, otherwise null
@@ -91,7 +91,7 @@ async function addListingToHaul(auth0Id, haulId, listingId) {
         const inserted = await UserModel.findOneAndUpdate(
             { auth0Id, "hauls._id": haulId },
             {
-                $push: { "hauls.$.listings": listingId },
+                $addToSet: { "hauls.$.listings": listingId },
                 "hauls.$.lastUpdated": new Date(),
             },
             {
@@ -107,7 +107,7 @@ async function addListingToHaul(auth0Id, haulId, listingId) {
         );
         return inserted;
     } catch (err) {
-        console.log("ERROR trying to create haul.  ", err);
+        console.log("ERROR trying to add listing to haul.  ", err);
     }
 }
 
@@ -123,8 +123,9 @@ async function removeListingFromHaul(auth0Id, haulId, listingId) {
                 "hauls.$.lastUpdated": new Date(),
             },
             {
+                new: true,
                 projection: {
-                    hauls: 0,
+                    hauls: { $elemMatch: { _id: haulId } },
                     listingsContributed: 0,
                     name: 0,
                     auth0Id: 0,
@@ -135,7 +136,7 @@ async function removeListingFromHaul(auth0Id, haulId, listingId) {
         );
         return inserted;
     } catch (err) {
-        console.log("ERROR trying to create haul.  ", err);
+        console.log("ERROR trying to remove listing from haul  ", err);
     }
 }
 

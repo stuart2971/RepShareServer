@@ -37,4 +37,5 @@ router.get("/newListings/:limit/:skip", async (req, res) => {
     );
     res.json(newListings);
 });
+
 module.exports = router;

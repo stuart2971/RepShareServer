@@ -11,14 +11,15 @@ const { scrape, scrapeImgur } = require("./webscrape");
 async function addListing(listing) {
     try {
         const scrapedResults = await scrape(listing.link);
+        console.log(scrapedResults);
         const scrapedData = {
-            name: scrapedResults ? scrapedResults.name : "",
+            name: scrapedResults ? scrapedResults.itemName : "",
             imageURL: scrapedResults ? scrapedResults.imageURL : "",
             price: scrapedResults ? scrapedResults.price : "",
         };
-        let images = [];
+        let images = scrapedData.imageURL;
         if (listing.imageURL) {
-            images = await scrapeImgur(listing.imageURL);
+            images = (await scrapeImgur(listing.imageURL)).imageURL;
         }
 
         const newListing = new ListingModel({
@@ -32,7 +33,6 @@ async function addListing(listing) {
             createdBy: listing.auth0Id,
             message: listing.message,
         });
-
         return new Promise((resolve) => {
             newListing.save(async (err, doc) => {
                 if (err) console.log(err);
@@ -91,6 +91,7 @@ async function getListingsData(listingsArray) {
                     tag: 1,
                     imageURL: 1,
                     qualityChecks: { $size: "$qualityChecks" },
+                    createdBy: 1,
                 },
             },
         ]);
