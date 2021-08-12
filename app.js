@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const { scrape } = require("./routes/utils/webscrape");
 
 mongoose.connect(process.env.MONGO_URL, {
     useNewUrlParser: true,

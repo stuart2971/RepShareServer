@@ -24,9 +24,6 @@ async function scrapeTaobao(link) {
             let imageURL = document.getElementById("J_ImgBooth");
             if (imageURL) imageURL = [imageURL.src];
 
-            let videoURL = document.querySelector("video[class='lib-video']");
-            if (videoURL) videoURL = videoURL.src;
-
             let price = document.querySelector("em[class='tb-rmb-num']");
             if (price) price = price.innerText;
 
@@ -37,7 +34,6 @@ async function scrapeTaobao(link) {
                 imageURL,
                 price,
                 itemName,
-                videoURL,
             };
         });
 
@@ -62,9 +58,6 @@ async function scrapeWeidian(link) {
             let imageURL = document.querySelector("img[class='item-img']");
             if (imageURL) imageURL = [imageURL.src];
 
-            let videoURL = document.getElementById("video");
-            if (videoURL) videoURL = videoURL.src;
-
             let priceSpan =
                 document.querySelector("span[class='discount-cur']") ||
                 document.querySelector(
@@ -78,7 +71,6 @@ async function scrapeWeidian(link) {
 
             return {
                 imageURL,
-                videoURL,
                 price,
                 itemName,
             };

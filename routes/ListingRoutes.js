@@ -8,6 +8,7 @@ const {
     getListing,
     getListingsData,
     getNewListings,
+    scrapeListing,
 } = require("./utils/ListingUtils");
 
 router.post("/addListing", async (req, res) => {
@@ -36,6 +37,11 @@ router.get("/newListings/:limit/:skip", async (req, res) => {
         parseInt(req.params.skip)
     );
     res.json(newListings);
+});
+
+router.post("/scrape", async (req, res) => {
+    const listingData = await scrapeListing(req.body.link);
+    res.json(listingData);
 });
 
 module.exports = router;

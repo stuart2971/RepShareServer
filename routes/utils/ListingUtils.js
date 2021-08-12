@@ -5,27 +5,32 @@ const ListingModel = require("../../models/Listing");
 const UserModel = require("../../models/User");
 const { isIdValid } = require("./GeneralUtils");
 
-const { scrape, scrapeImgur } = require("./webscrape");
+const { scrape } = require("./webscrape");
 
 // Adds a listing (scraped) into db and returns the new doc with the _id
 async function addListing(listing) {
     try {
-        const scrapedResults = await scrape(listing.link);
-        console.log(scrapedResults);
-        const scrapedData = {
-            name: scrapedResults ? scrapedResults.itemName : "",
-            imageURL: scrapedResults ? scrapedResults.imageURL : "",
-            price: scrapedResults ? scrapedResults.price : "",
-        };
-        let images = scrapedData.imageURL;
-        if (listing.imageURL) {
-            images = (await scrapeImgur(listing.imageURL)).imageURL;
+        let scrapedResults = {},
+            scrapedData = {},
+            images;
+        if (!listing.name || !listing.imageURL || !listing.price) {
+            scrapedResults = await scrape(listing.link);
+            console.log(scrapedResults);
+            scrapedData = {
+                name: scrapedResults ? scrapedResults.itemName : "",
+                imageURL: scrapedResults ? scrapedResults.imageURL : "",
+                price: scrapedResults ? scrapedResults.price : "",
+            };
+            images = scrapedData.imageURL;
         }
 
         const newListing = new ListingModel({
             name: listing.name || scrapedData.name,
             link: listing.link,
-            imageURL: images,
+            imageURL:
+                listing.imageAddresses.length !== 0
+                    ? listing.imageAddresses
+                    : scrapedData.imageURL,
             tag: listing.tag,
             price: scrapedData.price,
             qualityChecks: [],
@@ -121,10 +126,21 @@ async function getNewListings(limit, skip) {
     }
 }
 
+// Scrapes the listing
+async function scrapeListing(link) {
+    try {
+        const scrapedData = await scrape(link);
+        return scrapedData;
+    } catch (err) {
+        console.log("ERROR IN SCRAPING LISTING ", err);
+    }
+}
+
 module.exports = {
     addListing,
     doesExist,
     getListing,
     getListingsData,
     getNewListings,
+    scrapeListing,
 };
