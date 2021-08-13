@@ -9,6 +9,7 @@ const {
     getListingsData,
     getNewListings,
     scrapeListing,
+    deleteListing,
 } = require("./utils/ListingUtils");
 
 router.post("/addListing", async (req, res) => {
@@ -41,6 +42,11 @@ router.get("/newListings/:limit/:skip", async (req, res) => {
 
 router.post("/scrape", async (req, res) => {
     const listingData = await scrapeListing(req.body.link);
+    res.json(listingData);
+});
+
+router.get("/deleteListing/:listingId", async (req, res) => {
+    const listingData = await deleteListing(req.params.listingId);
     res.json(listingData);
 });
 

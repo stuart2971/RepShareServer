@@ -136,6 +136,20 @@ async function scrapeListing(link) {
     }
 }
 
+// Scrapes the listing
+async function deleteListing(listingId) {
+    try {
+        const deleted = await ListingModel.deleteOne({ _id: listingId });
+        if (deleted.ok === 1 && deleted.n === 1) {
+            return { deleted: true };
+        }
+        return { deleted: false };
+        // return scrapedData;
+    } catch (err) {
+        console.log("ERROR IN DELETING LISTING ", err);
+    }
+}
+
 module.exports = {
     addListing,
     doesExist,
@@ -143,4 +157,5 @@ module.exports = {
     getListingsData,
     getNewListings,
     scrapeListing,
+    deleteListing,
 };
