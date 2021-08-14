@@ -139,12 +139,31 @@ async function scrapeListing(link) {
 // Scrapes the listing
 async function deleteListing(listingId) {
     try {
+        if (!isIdValid(listingId)) return null;
+
         const deleted = await ListingModel.deleteOne({ _id: listingId });
         if (deleted.ok === 1 && deleted.n === 1) {
             return { deleted: true };
         }
         return { deleted: false };
         // return scrapedData;
+    } catch (err) {
+        console.log("ERROR IN DELETING LISTING ", err);
+    }
+}
+
+async function editListing(listingId, newListing) {
+    try {
+        if (!isIdValid(listingId)) return null;
+
+        const edited = await ListingModel.updateOne(
+            { _id: listingId },
+            newListing
+        );
+        if (edited.ok === 1 && edited.nModified === 1) {
+            return { edited: true };
+        }
+        return { edited: false };
     } catch (err) {
         console.log("ERROR IN DELETING LISTING ", err);
     }
@@ -158,4 +177,5 @@ module.exports = {
     getNewListings,
     scrapeListing,
     deleteListing,
+    editListing,
 };
