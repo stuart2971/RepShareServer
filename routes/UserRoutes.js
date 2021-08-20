@@ -1,15 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const UserModel = require("../models/User");
-
 const {
     getUser,
     getDashboardData,
     getMyListings,
+    increaseNumberOfQualityChecks,
 } = require("./utils/UserUtils");
-
-const { getListingData } = require("./utils/ListingUtils");
 
 router.get("/:auth0Id/getUser/:name", async (req, res) => {
     const user = await getUser(req.params.auth0Id, req.params.name);
@@ -23,8 +20,12 @@ router.get("/:auth0Id/getDashboardData", async (req, res) => {
 
 router.get("/:auth0Id/getMyListings", async (req, res) => {
     const myListings = await getMyListings(req.params.auth0Id);
-
     res.json(myListings);
+});
+
+router.get("/:auth0Id/test", async (req, res) => {
+    const a = await increaseNumberOfQualityChecks(req.params.auth0Id);
+    res.json(a);
 });
 
 module.exports = router;

@@ -67,4 +67,22 @@ async function getMyListings(auth0Id) {
     }
 }
 
-module.exports = { getUser, getDashboardData, getMyListings };
+async function increaseNumberOfQualityChecks(auth0Id) {
+    try {
+        const result = await UserModel.updateOne(
+            { auth0Id },
+            { $inc: { numberOfQualityChecks: 1 } }
+        );
+        if (result.ok === 1 && result.nModified === 1) return { updated: true };
+        return { updated: false };
+    } catch (err) {
+        console.log("ERROR GETTING MY LISTINGS", err);
+    }
+}
+
+module.exports = {
+    getUser,
+    getDashboardData,
+    getMyListings,
+    increaseNumberOfQualityChecks,
+};

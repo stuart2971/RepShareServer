@@ -11,6 +11,7 @@ const {
     scrapeListing,
     deleteListing,
     editListing,
+    addQualityCheck,
 } = require("./utils/ListingUtils");
 
 router.post("/addListing", async (req, res) => {
@@ -52,8 +53,12 @@ router.get("/deleteListing/:listingId", async (req, res) => {
 });
 
 router.post("/editListing/:listingId", async (req, res) => {
-    console.log("A");
     const edited = await editListing(req.params.listingId, req.body);
+    res.json(edited);
+});
+
+router.post("/createQualityCheck/:listingId", async (req, res) => {
+    const edited = await addQualityCheck(req.params.listingId, req.body);
     res.json(edited);
 });
 

@@ -4,6 +4,7 @@ var mongoose = require("mongoose");
 const ListingModel = require("../../models/Listing");
 const UserModel = require("../../models/User");
 const { isIdValid } = require("./GeneralUtils");
+const { increaseNumberOfQualityChecks } = require("./UserUtils");
 
 const { scrape } = require("./webscrape");
 
@@ -165,7 +166,26 @@ async function editListing(listingId, newListing) {
         }
         return { edited: false };
     } catch (err) {
-        console.log("ERROR IN DELETING LISTING ", err);
+        console.log("ERROR IN EDITING LISTING ", err);
+    }
+}
+
+async function addQualityCheck(listingId, qualityCheck) {
+    try {
+        if (!isIdValid(listingId)) return null;
+
+        const edited = await ListingModel.updateOne(
+            { _id: listingId },
+            { $push: { qualityChecks: qualityCheck } }
+        );
+        const updatedUser = await increaseNumberOfQualityChecks(
+            qualityCheck.auth0Id
+        );
+        if (edited.ok === 1 && edited.nModified === 1 && updatedUser.updated)
+            return { updated: true };
+        return { updated: false };
+    } catch (err) {
+        console.log("ERROR IN ADDING QUALITY CHECK IN LISTING ", err);
     }
 }
 
@@ -178,4 +198,5 @@ module.exports = {
     scrapeListing,
     deleteListing,
     editListing,
+    addQualityCheck,
 };

@@ -12,7 +12,8 @@ const Listing = new Schema({
     message: String,
     qualityChecks: [
         {
-            imgurLink: String,
+            name: String,
+            auth0Id: String,
             comment: String,
             rating: Number,
         },
