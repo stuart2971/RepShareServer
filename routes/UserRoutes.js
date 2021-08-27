@@ -23,9 +23,4 @@ router.get("/:auth0Id/getMyListings", async (req, res) => {
     res.json(myListings);
 });
 
-router.get("/:auth0Id/test", async (req, res) => {
-    const a = await increaseNumberOfQualityChecks(req.params.auth0Id);
-    res.json(a);
-});
-
 module.exports = router;
