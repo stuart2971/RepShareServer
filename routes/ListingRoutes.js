@@ -12,6 +12,8 @@ const {
     deleteListing,
     editListing,
     addQualityCheck,
+    deleteComment,
+    flagListing,
 } = require("./utils/ListingUtils");
 
 router.post("/addListing", async (req, res) => {
@@ -60,6 +62,22 @@ router.post("/editListing/:listingId", async (req, res) => {
 router.post("/createQualityCheck/:listingId", async (req, res) => {
     const edited = await addQualityCheck(req.params.listingId, req.body);
     res.json(edited);
+});
+
+router.get("/deleteComment/:listingId/:commentId", async (req, res) => {
+    const deletedComment = await deleteComment(
+        req.params.listingId,
+        req.params.commentId
+    );
+    res.json(deletedComment);
+});
+
+router.get("/flagListing/:listingId/:auth0Id", async (req, res) => {
+    const flaggedStatus = await flagListing(
+        req.params.listingId,
+        req.params.auth0Id
+    );
+    res.json(flaggedStatus);
 });
 
 module.exports = router;

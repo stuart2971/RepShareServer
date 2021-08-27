@@ -38,6 +38,7 @@ async function addListing(listing) {
             inHaul: 0,
             createdBy: listing.auth0Id,
             message: listing.message,
+            flags: [],
         });
         return new Promise((resolve) => {
             newListing.save(async (err, doc) => {
@@ -72,8 +73,27 @@ async function getListing(listingId) {
     try {
         if (!isIdValid(listingId)) return null;
 
-        const listing = await ListingModel.findOne({ _id: listingId });
-        return listing;
+        // const listing = await ListingModel.findOne({ _id: listingId });
+        const listing = await ListingModel.aggregate([
+            { $match: { _id: mongoose.Types.ObjectId(listingId) } },
+            {
+                $project: {
+                    createdBy: 1,
+                    name: 1,
+                    link: 1,
+                    imageURL: 1,
+                    tag: 1,
+                    price: 1,
+                    inHaul: 1,
+                    message: 1,
+                    flags: { $size: "$flags" },
+                    qualityChecks: { $slice: ["$qualityChecks", 0, 10] },
+                    averageRating: { $avg: "$qualityChecks.rating" },
+                },
+            },
+        ]);
+
+        return listing[0];
     } catch (err) {
         console.log("ERROR IN GET LISTING METHOD ", err);
     }
@@ -189,6 +209,49 @@ async function addQualityCheck(listingId, qualityCheck) {
     }
 }
 
+async function deleteComment(listingId, commentId) {
+    try {
+        if (!isIdValid(listingId)) return null;
+
+        const edited = await ListingModel.updateOne(
+            { _id: listingId },
+            { $pull: { qualityChecks: { _id: commentId } } }
+        );
+
+        if (edited.ok === 1 && edited.nModified === 1) return { deleted: true };
+        return { deleted: false };
+    } catch (err) {
+        console.log("ERROR IN ADDING QUALITY CHECK IN LISTING ", err);
+    }
+}
+
+async function flagListing(listingId, auth0Id) {
+    const MAX_FLAGS = 5;
+
+    try {
+        if (!isIdValid(listingId)) return null;
+
+        const flags = await ListingModel.findOne({ _id: listingId }, "flags");
+        // Deletes the listing if there is one less than the max (when called it would be the last flag)
+        if (flags.flags.length === MAX_FLAGS - 1) {
+            const deletedListing = await deleteListing(listingId);
+            return deletedListing;
+        } else {
+            const updated = await ListingModel.updateOne(
+                { _id: listingId },
+                {
+                    $addToSet: { flags: auth0Id },
+                }
+            );
+            if (updated.ok === 1 && updated.nModified === 1)
+                return { updated: true };
+        }
+        return { updated: false };
+    } catch (err) {
+        console.log("ERROR IN ADDING QUALITY CHECK IN LISTING ", err);
+    }
+}
+
 module.exports = {
     addListing,
     doesExist,
@@ -199,4 +262,6 @@ module.exports = {
     deleteListing,
     editListing,
     addQualityCheck,
+    deleteComment,
+    flagListing,
 };

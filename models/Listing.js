@@ -10,6 +10,7 @@ const Listing = new Schema({
     price: String,
     inHaul: Number,
     message: String,
+    flags: [String],
     qualityChecks: [
         {
             name: String,
