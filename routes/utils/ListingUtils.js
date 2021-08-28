@@ -108,6 +108,7 @@ async function getListingsData(listingsArray) {
         });
         const myListings = await ListingModel.aggregate([
             { $match: { _id: { $in: listingsArray } } },
+            { $sort: { _id: -1 } },
             {
                 $project: {
                     dateCreated: { $toDate: "$_id" },
