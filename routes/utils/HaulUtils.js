@@ -66,6 +66,7 @@ async function getHaulsData(auth0Id) {
     try {
         const haulsData = await UserModel.aggregate([
             { $match: { auth0Id } },
+            { $sort: { "hauls.lastUpdated": -1 } },
             { $unwind: "$hauls" },
             {
                 $project: {
@@ -140,6 +141,26 @@ async function removeListingFromHaul(auth0Id, haulId, listingId) {
     }
 }
 
+// Changes a haul name
+async function changeHaulName(auth0Id, haulId, newHaulName) {
+    try {
+        if (!isIdValid(haulId)) return null;
+
+        const inserted = await UserModel.updateOne(
+            { auth0Id, "hauls._id": haulId },
+            {
+                $set: { "hauls.$.name": newHaulName },
+            }
+        );
+        if (inserted.ok === 1 && inserted.nModified === 1) {
+            return { updated: true, newName: newHaulName };
+        }
+        return { updated: false };
+    } catch (err) {
+        console.log("ERROR trying to remove listing from haul  ", err);
+    }
+}
+
 module.exports = {
     createHaul,
     removeHaul,
@@ -147,4 +168,5 @@ module.exports = {
     getHaulsData,
     addListingToHaul,
     removeListingFromHaul,
+    changeHaulName,
 };

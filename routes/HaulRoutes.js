@@ -10,6 +10,7 @@ const {
     getHaulsData,
     addListingToHaul,
     removeListingFromHaul,
+    changeHaulName,
 } = require("./utils/HaulUtils");
 
 router.get("/:auth0Id/createHaul/:haulName", async (req, res) => {
@@ -53,6 +54,15 @@ router.get("/:auth0Id/removeFromHaul/:haulId/:listingId", async (req, res) => {
         req.params.listingId
     );
     res.json(message);
+});
+
+router.get("/:auth0Id/changeHaulName/:haulId/:haulName", async (req, res) => {
+    const status = await changeHaulName(
+        req.params.auth0Id,
+        req.params.haulId,
+        req.params.haulName
+    );
+    res.json(status);
 });
 
 module.exports = router;
