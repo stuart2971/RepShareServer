@@ -49,8 +49,11 @@ router.post("/scrape", async (req, res) => {
     res.json(listingData);
 });
 
-router.get("/deleteListing/:listingId", async (req, res) => {
-    const listingData = await deleteListing(req.params.listingId);
+router.get("/deleteListing/:listingId/:auth0Id", async (req, res) => {
+    const listingData = await deleteListing(
+        req.params.listingId,
+        req.params.auth0Id
+    );
     res.json(listingData);
 });
 

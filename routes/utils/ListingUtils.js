@@ -158,13 +158,24 @@ async function scrapeListing(link) {
     }
 }
 
-// Scrapes the listing
-async function deleteListing(listingId) {
+// Deletes the listing
+async function deleteListing(listingId, auth0Id) {
     try {
         if (!isIdValid(listingId)) return null;
 
         const deleted = await ListingModel.deleteOne({ _id: listingId });
-        if (deleted.ok === 1 && deleted.n === 1) {
+        const removedFromUserModel = await UserModel.updateOne(
+            { auth0Id },
+            {
+                $pull: { listingsContributed: listingId },
+            }
+        );
+        if (
+            deleted.ok === 1 &&
+            deleted.n === 1 &&
+            removedFromUserModel.nModified === 1 &&
+            removedFromUserModel.ok === 1
+        ) {
             return { deleted: true };
         }
         return { deleted: false };
