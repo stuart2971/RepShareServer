@@ -233,7 +233,7 @@ async function deleteComment(listingId, commentId) {
         if (edited.ok === 1 && edited.nModified === 1) return { deleted: true };
         return { deleted: false };
     } catch (err) {
-        console.log("ERROR IN ADDING QUALITY CHECK IN LISTING ", err);
+        console.log("ERROR DELETING COMMENT IN LISTING ", err);
     }
 }
 
@@ -260,6 +260,20 @@ async function flagListing(listingId, auth0Id) {
         }
         return { updated: false };
     } catch (err) {
+        console.log("ERROR FLAGGING LISTING ", err);
+    }
+}
+
+async function findListing(listingName) {
+    try {
+        var searchKey = new RegExp(listingName, "i");
+
+        const listings = await ListingModel.find({ name: searchKey })
+            .select("name _id")
+            .limit(10);
+
+        return listings;
+    } catch (err) {
         console.log("ERROR IN ADDING QUALITY CHECK IN LISTING ", err);
     }
 }
@@ -276,4 +290,5 @@ module.exports = {
     addQualityCheck,
     deleteComment,
     flagListing,
+    findListing,
 };

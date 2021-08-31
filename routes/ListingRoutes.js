@@ -14,6 +14,7 @@ const {
     addQualityCheck,
     deleteComment,
     flagListing,
+    findListing,
 } = require("./utils/ListingUtils");
 
 router.post("/addListing", async (req, res) => {
@@ -81,6 +82,11 @@ router.get("/flagListing/:listingId/:auth0Id", async (req, res) => {
         req.params.auth0Id
     );
     res.json(flaggedStatus);
+});
+
+router.get("/findListings/:listingQuery", async (req, res) => {
+    const listings = await findListing(req.params.listingQuery);
+    res.json(listings);
 });
 
 module.exports = router;
